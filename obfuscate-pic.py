@@ -4,13 +4,16 @@ from PIL import Image, ImageDraw
 import random
 
 BORDER_THICKNESS = 1
-SIZE = (20, 20)
+CELL_SIZE = (20, 20)
 CELL_COLOUR = "white"
 BORDER_COLOUR = "black"
 
 # Draw a single cell to hide the image at the given cell number
-def overlay_cell(image_drawer, cell_number):
-    pass
+# Cells are numbered left to right, top to bottom.
+def overlay_cell(image_drawer, cell_number, cell_counts):
+    cell_row = cell_number // cell_counts[0]
+    cell_column = cell_number % cell_counts[0]
+    draw_cell(image_drawer, (cell_column * CELL_SIZE[0], cell_row * CELL_SIZE[1]), CELL_SIZE)
 
 def draw_cell(image_drawer, top_left_coordinate, size):
     # Draw outer box, full cell.
@@ -23,11 +26,11 @@ def draw_cell(image_drawer, top_left_coordinate, size):
 
 image = Image.open("prata-bozz.jpg")
 width, height = image.size
+# Number of cells. Tuple with (number of columns, number of rows).
+cell_counts = (width // CELL_SIZE[0], height // CELL_SIZE[1])
 draw = ImageDraw.Draw(image)
 
-for x in range(width//SIZE[0]):
-    for y in range(height//SIZE[1]):
-        if random.randint(1, 100) > 65:
-            draw_cell(draw, (x * SIZE[0], y * SIZE[1]), SIZE)
+for i in range(30, 60):
+    overlay_cell(draw, i, cell_counts)
 
 image.save("prata-bozz-obfuscated.jpg")
