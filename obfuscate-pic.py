@@ -2,18 +2,24 @@
 
 from PIL import Image, ImageDraw
 import random
+import json
 
 BORDER_THICKNESS = 1
-CELL_SIZE = (20, 20)
-CELL_COLOUR = "white"
+CELL_COLOUR = "gray"
 BORDER_COLOUR = "black"
+
+def read_picture_parameters(filename):
+    parameters = {}
+    with open(filename, 'r') as infile:
+        parameters = json.load(infile)
+    return parameters
 
 # Draw a single cell to hide the image at the given cell number
 # Cells are numbered left to right, top to bottom.
-def overlay_cell(image_drawer, cell_number, cell_counts):
-    cell_row = cell_number // cell_counts[0]
-    cell_column = cell_number % cell_counts[0]
-    draw_cell(image_drawer, (cell_column * CELL_SIZE[0], cell_row * CELL_SIZE[1]), CELL_SIZE)
+def overlay_cell(image_drawer, cell_number, parameters):
+    cell_row = cell_number // parameters['cell_counts'][0]
+    cell_column = cell_number % parameters['cell_counts'][0]
+    draw_cell(image_drawer, (cell_column * parameters['cell_size'][0], cell_row * parameters['cell_size'][1]), parameters['cell_size'])
 
 def draw_cell(image_drawer, top_left_coordinate, size):
     # Draw outer box, full cell.
@@ -25,12 +31,21 @@ def draw_cell(image_drawer, top_left_coordinate, size):
     image_drawer.rectangle((inner_top_left, inner_bottom_right), fill=CELL_COLOUR)
 
 image = Image.open("prata-bozz.jpg")
-width, height = image.size
-# Number of cells. Tuple with (number of columns, number of rows).
-cell_counts = (width // CELL_SIZE[0], height // CELL_SIZE[1])
+parameters = read_picture_parameters("prata-bozz.txt")
+parameters['width'], parameters['height'] = image.size
+parameters['cell_counts'] = (parameters['width'] // parameters['cell_size'][0], parameters['height'] // parameters['cell_size'][1])
+print(parameters)
 draw = ImageDraw.Draw(image)
+parameters['bozzcoins'] = 807
 
-for i in range(30, 60):
-    overlay_cell(draw, i, cell_counts)
+num_total_cells = parameters['cell_counts'][0] * parameters['cell_counts'][1]
+num_coins_per_cell = parameters['target'] // num_total_cells
+num_covered_cells = num_total_cells - parameters['bozzcoins'] // num_coins_per_cell
+
+random.seed(parameters['random_seed'])
+covered_cells = random.sample(range(num_total_cells), num_covered_cells)
+
+for cell_number in covered_cells:
+    overlay_cell(draw, cell_number, parameters)
 
 image.save("prata-bozz-obfuscated.jpg")
