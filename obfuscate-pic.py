@@ -38,7 +38,6 @@ parameters['width'], parameters['height'] = image.size
 parameters['cell_counts'] = (parameters['width'] // parameters['cell_size'][0], parameters['height'] // parameters['cell_size'][1])
 print(parameters)
 draw = ImageDraw.Draw(image)
-parameters['bozzcoins'] = 807
 
 num_total_cells = parameters['cell_counts'][0] * parameters['cell_counts'][1]
 num_coins_per_cell = parameters['target'] // num_total_cells
