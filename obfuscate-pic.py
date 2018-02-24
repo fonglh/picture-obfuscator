@@ -3,11 +3,11 @@
 from PIL import Image, ImageDraw
 import random
 import json
+import sys
 
 BORDER_THICKNESS = 1
 CELL_COLOUR = "gray"
 BORDER_COLOUR = "black"
-PICTURE_FILENAME = 'prata-bozz.jpg'
 
 def read_picture_parameters(filename):
     parameters = {}
@@ -31,22 +31,31 @@ def draw_cell(image_drawer, top_left_coordinate, size):
     inner_bottom_right = (bottom_right_coordinate[0] - BORDER_THICKNESS, bottom_right_coordinate[1] - BORDER_THICKNESS)
     image_drawer.rectangle((inner_top_left, inner_bottom_right), fill=CELL_COLOUR)
 
-image = Image.open(PICTURE_FILENAME)
-parameters_filename = PICTURE_FILENAME.split('.')[0] + '.txt'
+if len(sys.argv) == 3:
+    picture_filename = sys.argv[1]
+    bozzcoins = int(sys.argv[2])
+else:
+    print('Usage: obfuscate-pic.py <picture_filename> <bozzcoins>')
+    exit(1)
+
+image = Image.open(picture_filename)
+parameters_filename = picture_filename.split('.')[0] + '.txt'
 parameters = read_picture_parameters(parameters_filename)
 parameters['width'], parameters['height'] = image.size
 parameters['cell_counts'] = (parameters['width'] // parameters['cell_size'][0], parameters['height'] // parameters['cell_size'][1])
 print(parameters)
 draw = ImageDraw.Draw(image)
 
+# Calculate total number of cells then figure out how many cells should be covered.
 num_total_cells = parameters['cell_counts'][0] * parameters['cell_counts'][1]
 num_coins_per_cell = parameters['target'] // num_total_cells
-num_covered_cells = num_total_cells - parameters['bozzcoins'] // num_coins_per_cell
+num_covered_cells = num_total_cells - bozzcoins // num_coins_per_cell
 
+# Fix the random seed so the choice of cells to cover is always the same.
 random.seed(parameters['random_seed'])
 covered_cells = random.sample(range(num_total_cells), num_covered_cells)
 
 for cell_number in covered_cells:
     overlay_cell(draw, cell_number, parameters)
 
-image.save(PICTURE_FILENAME.split('.')[0] + '-obfuscated.jpg')
+image.save(picture_filename.split('.')[0] + '-obfuscated.jpg')
