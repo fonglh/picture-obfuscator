@@ -2,17 +2,18 @@ import json
 
 # The parameters file should have the same name as the picture, but with
 # a .txt extension instead of .jpg.
-picture_name = input('Picture name: ')
-filename = picture_name + '.txt'
+picture_filename = input('Picture filename with extension: ')
+filename = picture_filename.split('.')[0] + '.txt'
 
-# If the file exists, reuse all the parameters except the current bozzcoins
+# If the file exists, print the parameters.
 # Else prompt the user for the parameters.
 try:
     with open(filename, 'r') as infile:
         parameters = json.load(infile)
+        cell_width, cell_height = parameters['cell_size']
         random_seed = parameters['random_seed']
         target = parameters['target']
-        cell_width, cell_height = parameters['cell_size']
+        print(parameters)
 except:
     random_seed = input('Random seed: ')
     random_seed = int(random_seed)
@@ -23,10 +24,7 @@ except:
     cell_height = input('Cell height: ')
     cell_height = int(cell_height)
 
-bozzcoins = input('Current bozzcoins: ')
-bozzcoins = int(bozzcoins)
-
 # Write picture parameters to file.
 with open(filename, 'w') as outfile:
-    params = { 'cell_size': [cell_width, cell_height], 'random_seed': random_seed, 'target': target, 'bozzcoins': bozzcoins}
+    params = { 'cell_size': [cell_width, cell_height], 'random_seed': random_seed, 'target': target}
     json.dump(params, outfile)
